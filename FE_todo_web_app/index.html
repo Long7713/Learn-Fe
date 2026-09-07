@@ -11,28 +11,124 @@
     />
   </head>
   <body>
-    <main class="todo-app">
-      <aside class="Sidebar">
+    <div class="todo-app">
+      <!--Thanh sidebar( ben trai)-->
+      <aside class="Sidebar" id="sidebar">
         <div class="logo">
           <h2>intelly</h2>
+          <!-- Nút toggle icon mũi tên / thu gọn -->
+          <button id="toggle-btn" class="toggle-btn">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
         </div>
         <nav class="menu">
           <p class="menu-label">General</p>
           <ul>
             <li class="active">
               <i class="fa-solid fa-grid-2"></i>
-              Dashboard
+              <span class="link-text">Dashboard</span>
             </li>
-            <li><i class="fa-regular fa-calendar"></i> Schedule</li>
-            <li><i class="fa-solid fa-user-group"></i> Patients</li>
             <li>
-              <i class="fa-solid fa-chart-simple"></i> Statistics & reports
+              <i class="fa-regular fa-calendar"></i>
+              <span class="link-text">Schedule</span>
             </li>
-            <li><i class="fa-solid fa-book-open"></i> Education</li>
-            <li><i class="fa-regular fa-bookmark"></i> My articles</li>
+            <li>
+              <i class="fa-solid fa-user-group"></i>
+              <span class="link-text">Patients</span>
+            </li>
+            <li>
+              <i class="fa-solid fa-chart-simple"></i>
+              <span class="link-text">Statistics & reports</span>
+            </li>
+            <li>
+              <i class="fa-solid fa-book-open"></i>
+              <span class="link-text">Education</span>
+            </li>
+            <li>
+              <i class="fa-regular fa-bookmark"></i>
+              <span class="link-text">My articles</span>
+            </li>
+          </ul>
+          <p class="menu-label">Tools</p>
+          <ul>
+            <li>
+              <i class="fa-regular fa-comment"></i>
+              <span class="link-text">Chats & calls</span>
+            </li>
+            <li>
+              <i class="fa-solid fa-wallet"></i>
+              <span class="link-text">Billing</span>
+            </li>
+            <li>
+              <i class="fa-regular fa-file-lines"></i>
+              <span class="link-text">Documents base</span>
+            </li>
+            <li>
+              <i class="fa-solid fa-gear"></i>
+              <span class="link-text">Settings</span>
+            </li>
           </ul>
         </nav>
+        <div class="logout">
+          <a href="#">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span class="link-text">Log out</span>
+          </a>
+        </div>
+        <div class="logout">
+          <a href="#"
+            ><i class="fa-solid fa-arrow-right-from-bracket"></i>Log out</a
+          >
+        </div>
       </aside>
-    </main>
+      <!--Main board (bang chinh ben phai)-->
+      <main class="main-content">
+        <!--Phan header , thanh tim kiem, -->
+        <header class="top-header">
+          <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search" />
+          </div>
+          <div class="user-actions">
+            <button class="icon-btn"><i class="fa-regular fa-user"></i></button>
+            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+            <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
+          </div>
+        </header>
+        <!-- Sub-header (Thanh chào mừng & thao tác) -->
+        <section class="dashboard-header">
+          <h1>Stay up to date, Long</h1>
+          <div class="action-buttons">
+            <button class="btn-add">+ Add event</button>
+          </div>
+        </section>
+        <!-- Khu vực chứa Lịch  -->
+        <section class="calendar-container">
+          <!-- Thanh điều hướng Lịch (Header Lịch) -->
+          <div class="calendar-header">
+            <div class="date-picker">
+              <button class="btn-date">
+                May 11/05 - 17/05 <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </div>
+            <div class="view-options">
+              <button class="view-btn">Today</button>
+              <button class="view-btn active">Week</button>
+              <button class="view-btn">Month</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script>
+      const toggleBtn = document.getElementById("toggle-btn");
+      const sidebar = document.getElementById("sidebar");
+      const todoApp = document.querySelector(".todo-app");
+
+      toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+        todoApp.classList.toggle("collapsed-mode");
+      });
+    </script>
   </body>
 </html>

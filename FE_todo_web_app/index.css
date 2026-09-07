@@ -1,1 +1,41 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
 
+body {
+  background-color: #f6f5f0;
+}
+
+/* Khung chính chia 2 cột */
+.todo-app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  transition: all 0.3s ease; /* Hiệu ứng co giãn mượt */
+}
+
+/* Khi thu gọn -> đổi chiều rộng cột 1 thành 80px */
+.todo-app.collapsed-mode {
+  grid-template-columns: 80px 1fr;
+}
+
+.Sidebar {
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 20px;
+}
+
+/* Khi Sidebar thu gọn -> Ẩn chữ và menu label */
+.Sidebar.collapsed .link-text,
+.Sidebar.collapsed .menu-label,
+.Sidebar.collapsed h2 {
+  display: none;
+}
+
+/* Xoay icon nút bấm khi thu gọn */
+.Sidebar.collapsed .toggle-btn i {
+  transform: rotate(180deg);
+}
