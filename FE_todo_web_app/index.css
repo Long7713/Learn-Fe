@@ -39,3 +39,130 @@ body {
 .Sidebar.collapsed .toggle-btn i {
   transform: rotate(180deg);
 }
+/* 1. Khung chứa tổng quát của Lịch */
+.calendar-container {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+/* 2. Thanh thao tác trên đầu Lịch (Header) */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.btn-date {
+  background: #f0f0f0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.view-options {
+  background-color: #f0f0f0;
+  padding: 4px;
+  border-radius: 20px;
+}
+
+.view-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.view-btn.active {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* 3. Tiêu đề các ngày trong tuần (Grid 7 cột: 1 cột giờ + 6 cột ngày) */
+.grid-header {
+  display: grid;
+  grid-template-columns: 60px repeat(6, 1fr);
+  text-align: center;
+  font-weight: bold;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.header-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 13px;
+  color: #666666;
+}
+
+.header-cell span {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Style cho ngày hiện tại */
+.header-cell.active-day {
+  background-color: #000000;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 6px 0;
+}
+
+/* 4. Thân lịch (Chứa mốc giờ & thẻ công việc) */
+.grid-body {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  margin-top: 15px;
+}
+
+.time-slot {
+  height: 50px; /* Mỗi mốc 30 phút cao 50px */
+  color: #aaaaaa;
+  font-size: 12px;
+}
+
+.events-area {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-rows: 25px; /* Nấc thời gian 15 phút tương ứng 25px */
+  gap: 8px;
+}
+
+/* 5. Style các thẻ sự kiện (Event Cards) */
+.event-card {
+  border-radius: 12px;
+  padding: 8px;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.event-card.pink {
+  background-color: #fde8ef;
+  color: #d63384;
+}
+.event-card.yellow {
+  background-color: #fff3cd;
+  color: #856404;
+}
+.event-card.blue {
+  background-color: #e2f0fb;
+  color: #0c5460;
+}
+
+.card-title {
+  font-weight: bold;
+  margin: 2px 0;
+}
+.card-sub,
+.card-time {
+  font-size: 10px;
+  opacity: 0.8;
+}

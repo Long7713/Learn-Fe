@@ -116,19 +116,92 @@
               <button class="view-btn active">Week</button>
               <button class="view-btn">Month</button>
             </div>
+            <div class="view-options">
+              <button class="view-btn">Today</button>
+              <button class="view-btn active">Week</button>
+              <button class="view-btn">Month</button>
+            </div>
+          </div>
+          <!-- 2. Hàng tiêu đề các Ngày trong tuần -->
+          <div class="grid-header" id="grid-header">
+            <div class="header-cell time-zone">
+              W <span id="week-number">--</span>
+            </div>
+            <div class="header-cell" data-day="1">
+              MON <span class="day-date">--/--</span>
+            </div>
+            <div class="header-cell" data-day="2">
+              TUE <span class="day-date">--/--</span>
+            </div>
+            <div class="header-cell" data-day="3">
+              WED <span class="day-date">--/--</span>
+            </div>
+            <div class="header-cell" data-day="4">
+              THU <span class="day-date">--/--</span>
+            </div>
+            <div class="header-cell" data-day="5">
+              FRI <span class="day-date">--/--</span>
+            </div>
+            <div class="header-cell" data-day="6">
+              SAT <span class="day-date">--/--</span>
+            </div>
+          </div>
+          <!-- 3. Thân lưới (Cột giờ & các Thẻ sự kiện) -->
+          <div class="grid-body">
+            <!-- Cột mốc giờ bên trái -->
+            <div class="time-col">
+              <div class="time-slot">07:00</div>
+              <div class="time-slot">07:30</div>
+              <div class="time-slot">08:00</div>
+              <div class="time-slot">08:30</div>
+              <div class="time-slot">09:00</div>
+            </div>
+
+            <!-- Khu vực đặt các thẻ sự kiện -->
+            <div class="events-area">
+              <!-- Thẻ mẫu 1 (Thứ 2, 07:00 - 08:00) -->
+              <div
+                class="event-card pink"
+                style="grid-column: 1; grid-row: 1 / span 2"
+              >
+                <div class="card-header">
+                  <i class="fa-solid fa-user-doctor"></i>
+                </div>
+                <div class="card-title">Emergency visit</div>
+                <div class="card-sub">West camp. Room 312</div>
+                <div class="card-time">07:00 - 08:00</div>
+              </div>
+
+              <!-- Thẻ mẫu 2 (Thứ 2, 08:00 - 09:30) -->
+              <div
+                class="event-card yellow"
+                style="grid-column: 1; grid-row: 3 / span 3"
+              >
+                <div class="card-header">
+                  <i class="fa-solid fa-people-group"></i>
+                </div>
+                <div class="card-title">Team planning</div>
+                <div class="card-sub">East camp. Room 200</div>
+                <div class="card-time">08:00 - 09:30</div>
+              </div>
+
+              <!-- Thẻ mẫu 3 (Thứ 4, 07:30 - 08:30) -->
+              <div
+                class="event-card blue"
+                style="grid-column: 3; grid-row: 2 / span 2"
+              >
+                <div class="card-header">
+                  <i class="fa-solid fa-notes-medical"></i>
+                </div>
+                <div class="card-title">Diagnostic test</div>
+                <div class="card-sub">West camp. Room 102</div>
+                <div class="card-time">07:30 - 08:30</div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
     </div>
-    <script>
-      const toggleBtn = document.getElementById("toggle-btn");
-      const sidebar = document.getElementById("sidebar");
-      const todoApp = document.querySelector(".todo-app");
-
-      toggleBtn.addEventListener("click", () => {
-        sidebar.classList.toggle("collapsed");
-        todoApp.classList.toggle("collapsed-mode");
-      });
-    </script>
+    <script src="script.js"></script>
   </body>
 </html>
