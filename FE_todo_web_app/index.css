@@ -2,52 +2,204 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
-  background-color: #f6f5f0;
+  background-color: #f3eee3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
 }
 
-/* Khung chính chia 2 cột */
+/* Framework Khung chính */
 .todo-app {
   display: grid;
   grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-  transition: all 0.3s ease; /* Hiệu ứng co giãn mượt */
+  width: 100%;
+  max-width: 1400px;
+  background-color: #ffffff;
+  border-radius: 32px;
+  padding: 16px;
+  gap: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: grid-template-columns 0.3s ease;
 }
 
-/* Khi thu gọn -> đổi chiều rộng cột 1 thành 80px */
 .todo-app.collapsed-mode {
   grid-template-columns: 80px 1fr;
 }
 
-.Sidebar {
-  background-color: #1a1a1a;
-  color: #fff;
-  padding: 20px;
+/* ===== 1. SIDEBAR STYLING ===== */
+.sidebar {
+  background-color: #18181b;
+  color: #ffffff;
+  border-radius: 24px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* Khi Sidebar thu gọn -> Ẩn chữ và menu label */
-.Sidebar.collapsed .link-text,
-.Sidebar.collapsed .menu-label,
-.Sidebar.collapsed h2 {
+.logo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+  margin-bottom: 24px;
+}
+
+.logo h2 {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-label {
+  font-size: 11px;
+  color: #71717a;
+  text-transform: uppercase;
+  margin: 16px 0 8px 8px;
+  font-weight: 600;
+}
+
+.menu ul {
+  list-style: none;
+}
+
+.menu li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.menu li.active,
+.menu li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.logout {
+  padding-top: 16px;
+  border-top: 1px solid #27272a;
+}
+
+.logout a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #a1a1aa;
+  text-decoration: none;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+/* Sidebar Collapsed State */
+.sidebar.collapsed .link-text,
+.sidebar.collapsed .menu-label,
+.sidebar.collapsed h2 {
   display: none;
 }
 
-/* Xoay icon nút bấm khi thu gọn */
-.Sidebar.collapsed .toggle-btn i {
+.sidebar.collapsed .toggle-btn i {
   transform: rotate(180deg);
 }
-/* 1. Khung chứa tổng quát của Lịch */
+
+/* ===== 2. TOP HEADER STYLING ===== */
+.main-content {
+  padding: 8px;
+}
+
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  background-color: #f4f4f5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  width: 300px;
+}
+
+.search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.user-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e4e4e7;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== 3. DASHBOARD HEADER & CALENDAR ===== */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-header h1 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.btn-add {
+  background-color: #18181b;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .calendar-container {
   background-color: #ffffff;
   border-radius: 16px;
-  padding: 20px;
-  margin-top: 20px;
 }
 
-/* 2. Thanh thao tác trên đầu Lịch (Header) */
 .calendar-header {
   display: flex;
   justify-content: space-between;
@@ -56,16 +208,16 @@ body {
 }
 
 .btn-date {
-  background: #f0f0f0;
+  background: #f4f4f5;
   border: none;
   padding: 8px 16px;
   border-radius: 20px;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .view-options {
-  background-color: #f0f0f0;
+  background-color: #f4f4f5;
   padding: 4px;
   border-radius: 20px;
 }
@@ -76,45 +228,44 @@ body {
   padding: 6px 16px;
   border-radius: 16px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .view-btn.active {
-  background-color: #000000;
+  background-color: #18181b;
   color: #ffffff;
 }
 
-/* 3. Tiêu đề các ngày trong tuần (Grid 7 cột: 1 cột giờ + 6 cột ngày) */
+/* Grid Layout */
 .grid-header {
   display: grid;
   grid-template-columns: 60px repeat(6, 1fr);
   text-align: center;
   font-weight: bold;
   padding-bottom: 12px;
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid #f4f4f5;
 }
 
 .header-cell {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 13px;
-  color: #666666;
+  font-size: 12px;
+  color: #71717a;
 }
 
-.header-cell span {
+.header-cell .day-date {
   font-size: 11px;
   margin-top: 2px;
 }
 
-/* Style cho ngày hiện tại */
 .header-cell.active-day {
-  background-color: #000000;
+  background-color: #18181b;
   color: #ffffff;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 6px 0;
 }
 
-/* 4. Thân lịch (Chứa mốc giờ & thẻ công việc) */
 .grid-body {
   display: grid;
   grid-template-columns: 60px 1fr;
@@ -122,19 +273,19 @@ body {
 }
 
 .time-slot {
-  height: 50px; /* Mỗi mốc 30 phút cao 50px */
-  color: #aaaaaa;
+  height: 50px;
+  color: #a1a1aa;
   font-size: 12px;
 }
 
 .events-area {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-auto-rows: 25px; /* Nấc thời gian 15 phút tương ứng 25px */
+  grid-auto-rows: 25px;
   gap: 8px;
 }
 
-/* 5. Style các thẻ sự kiện (Event Cards) */
+/* Event Cards Color */
 .event-card {
   border-radius: 12px;
   padding: 8px;
@@ -144,17 +295,17 @@ body {
   justify-content: space-between;
 }
 
-.event-card.pink {
-  background-color: #fde8ef;
-  color: #d63384;
-}
 .event-card.yellow {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: #fbe38e;
+  color: #2d2605;
+}
+.event-card.pink {
+  background-color: #fce3ec;
+  color: #4a1525;
 }
 .event-card.blue {
-  background-color: #e2f0fb;
-  color: #0c5460;
+  background-color: #cbe0f8;
+  color: #0d2b45;
 }
 
 .card-title {

@@ -2,24 +2,13 @@ const toggleBtn = document.getElementById("toggle-btn");
 const sidebar = document.getElementById("sidebar");
 const todoApp = document.querySelector(".todo-app");
 
-toggleBtn.addEventListener("click", () => {
-  sidebar.classList.toggle("collapsed");
-  todoApp.classList.toggle("collapsed-mode");
-});
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Logic Toggle Sidebar (từ Day 1)
-  const toggleBtn = document.getElementById("toggle-btn");
-  const sidebar = document.getElementById("sidebar");
-  const todoApp = document.querySelector(".todo-app");
-
   if (toggleBtn && sidebar && todoApp) {
     toggleBtn.addEventListener("click", () => {
       sidebar.classList.toggle("collapsed");
       todoApp.classList.toggle("collapsed-mode");
     });
   }
-
-  // 2. Chạy hàm tính ngày cho Lịch (Day 2)
   renderCurrentWeek();
 });
 
@@ -28,7 +17,6 @@ function renderCurrentWeek() {
   const today = new Date();
   const currentDayOfWeek = today.getDay(); // 0: Chủ Nhật, 1: T2, ..., 6: T7
 
-  // Lùi thời gian về ngày Thứ 2 của tuần hiện tại
   const distanceToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
   const monday = new Date(today);
   monday.setDate(today.getDate() + distanceToMonday);
