@@ -242,6 +242,17 @@ body {
 }
 
 /* Grid Layout */
+/*
+ =========================
+      CALENDAR GRID
+========================= */
+
+.calendar-grid {
+  width: 100%;
+}
+
+/* Header */
+
 .grid-header {
   display: grid;
   grid-template-columns: 60px repeat(6, 1fr);
@@ -265,6 +276,8 @@ body {
   margin-top: 2px;
 }
 
+/* Active day */
+
 .header-cell.active-day {
   background-color: #18181b;
   color: #ffffff;
@@ -272,11 +285,22 @@ body {
   padding: 6px 0;
 }
 
+/* Body */
+
 .grid-body {
   display: grid;
   grid-template-columns: 60px 1fr;
   margin-top: 10px;
   position: relative;
+  background-image: linear-gradient(to bottom, #e4e4e7 1px, transparent 1px);
+  background-size: 100% 30px;
+}
+
+/* Time */
+
+.time-col {
+  display: flex;
+  flex-direction: column;
 }
 
 .time-slot {
@@ -287,44 +311,62 @@ body {
   align-items: flex-start;
 }
 
-/*Event Area*/
+/* Event area */
+
 .events-area {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  rid-template-rows: repeat(10, 30px);
-  grid-auto-rows: 25px;
-  gap: 8px;
+  grid-template-rows: repeat(10, 30px);
+  gap: 0;
   position: relative;
+  /* Lưới ngang + dọc */
+  background-image:
+    linear-gradient(to right, #e4e4e7 1px, transparent 1px),
+    linear-gradient(to bottom, #e4e4e7 1px, transparent 1px);
+  background-size:
+    calc(100% / 6) 100%,
+    100% 30px;
 }
 
-/* Event Cards Color */
+/* Event cards */
+
 .event-card {
-  border-radius: 12px;
   padding: 8px;
   font-size: 11px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 2px;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
+
+/* Colors */
 
 .event-card.yellow {
   background-color: #fbe38e;
   color: #2d2605;
 }
+
 .event-card.pink {
   background-color: #fce3ec;
   color: #4a1525;
 }
+
 .event-card.blue {
   background-color: #cbe0f8;
   color: #0d2b45;
 }
 
+/* Event text */
+
 .card-title {
   font-weight: bold;
   margin: 2px 0;
 }
+
 .card-sub,
 .card-time {
   font-size: 10px;
