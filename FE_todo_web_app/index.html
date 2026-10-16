@@ -4,72 +4,78 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Intelly Dashboard</title>
-    <link rel="stylesheet" href="index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
+    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <div class="todo-app">
-      <!-- sidebar -->
+    <div class="todo-app" id="todo-app">
+      <!-- Sidebar (Bên trái) -->
       <aside class="sidebar" id="sidebar">
         <div class="logo">
           <h2>intelly</h2>
-          <button id="toggle-btn" class="toggle-btn">
+          <button id="toggle-btn" class="toggle-btn" aria-label="Thu gọn menu">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
         </div>
         <nav class="menu">
           <p class="menu-label">General</p>
           <ul>
-            <li class="active">
+            <li title="Dashboard">
               <i class="fa-solid fa-table-cells-large"></i>
               <span class="link-text">Dashboard</span>
             </li>
-            <li>
+            <li class="active" title="Schedule">
               <i class="fa-regular fa-calendar"></i>
               <span class="link-text">Schedule</span>
             </li>
-            <li>
+            <li title="Patients">
               <i class="fa-solid fa-user-group"></i>
               <span class="link-text">Patients</span>
             </li>
-            <li>
-              <i class="fa-solid fa-chart-simple"></i>
+            <li title="Statistics & reports">
+              <i class="fa-solid fa-chart-pie"></i>
               <span class="link-text">Statistics & reports</span>
             </li>
-            <li>
+            <li title="Education">
               <i class="fa-solid fa-book-open"></i>
               <span class="link-text">Education</span>
             </li>
-            <li>
+            <li title="My articles">
               <i class="fa-regular fa-bookmark"></i>
               <span class="link-text">My articles</span>
             </li>
           </ul>
           <p class="menu-label">Tools</p>
           <ul>
-            <li>
-              <i class="fa-regular fa-comment"></i>
+            <li title="Chats & calls">
+              <i class="fa-regular fa-comments"></i>
               <span class="link-text">Chats & calls</span>
             </li>
-            <li>
-              <i class="fa-solid fa-wallet"></i>
+            <li title="Billing">
+              <i class="fa-solid fa-dollar-sign"></i>
               <span class="link-text">Billing</span>
             </li>
-            <li>
+            <li title="Documents base">
               <i class="fa-regular fa-file-lines"></i>
               <span class="link-text">Documents base</span>
             </li>
-            <li>
+            <li title="Settings">
               <i class="fa-solid fa-gear"></i>
               <span class="link-text">Settings</span>
             </li>
           </ul>
         </nav>
         <div class="logout">
-          <a href="#">
+          <a href="#" title="Log out">
             <i class="fa-solid fa-arrow-right-from-bracket"></i>
             <span class="link-text">Log out</span>
           </a>
@@ -80,14 +86,23 @@
       <main class="main-content">
         <!-- Top Header -->
         <header class="top-header">
-          <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search" />
+          <div class="search-wrap">
+            <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <div class="search-bar">
+              <input type="search" id="search-input" placeholder="Search" />
+              <div class="search-filters">
+                <span class="filter-label">In:</span>
+                <button class="filter-chip" data-category="patients">Patients</button>
+                <button class="filter-chip" data-category="education">Education</button>
+                <button class="filter-chip" data-category="prescriptions">Prescriptions</button>
+                <button class="filter-chip" data-category="tests">Test results</button>
+              </div>
+            </div>
           </div>
           <div class="user-actions">
-            <button class="icon-btn"><i class="fa-regular fa-user"></i></button>
-            <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
-            <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
+            <button class="icon-btn dark" aria-label="Tài khoản"><i class="fa-regular fa-user"></i></button>
+            <button class="icon-btn dark" aria-label="Thông báo"><i class="fa-regular fa-bell"></i></button>
+            <button class="icon-btn dark" aria-label="Cài đặt"><i class="fa-solid fa-gear"></i></button>
           </div>
         </header>
 
@@ -95,7 +110,13 @@
         <section class="dashboard-header">
           <h1>Stay up to date, Long</h1>
           <div class="action-buttons">
-            <button class="btn-add">+ Add event</button>
+            <button class="btn-add" id="add-btn">Add event</button>
+            <button class="icon-btn" id="refresh-btn" aria-label="Làm mới lịch" title="Refresh">
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+            <button class="icon-btn" id="edit-btn" aria-label="Chế độ chỉnh sửa" title="Edit mode">
+              <i class="fa-solid fa-pen"></i>
+            </button>
           </div>
         </section>
 
@@ -103,83 +124,138 @@
         <div class="calendar-container">
           <div class="calendar-header">
             <div class="date-picker">
-              <button class="btn-date">
-                May 11/05 - 17/05 <i class="fa-solid fa-chevron-down"></i>
+              <button class="nav-btn" id="prev-btn" aria-label="Trước"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="btn-date" id="btn-date">
+                <span id="date-range">-- / --</span> <i class="fa-solid fa-chevron-down"></i>
               </button>
+              <button class="nav-btn" id="next-btn" aria-label="Sau"><i class="fa-solid fa-chevron-right"></i></button>
+              <input type="date" id="week-picker" class="week-picker" tabindex="-1" aria-hidden="true" />
             </div>
             <div class="view-options">
-              <button class="view-btn">Today</button>
-              <button class="view-btn active">Week</button>
-              <button class="view-btn">Month</button>
+              <button class="view-btn" data-view="today">Today</button>
+              <button class="view-btn active" data-view="week">Week</button>
+              <button class="view-btn" data-view="month">Month</button>
             </div>
           </div>
 
-          <!-- Grid Header -->
-          <div class="grid-header" id="grid-header">
-            <div class="header-cell time-zone">
-              W <span id="week-number">--</span>
-            </div>
-            <div class="header-cell" data-day="1">
-              MON <span class="day-date">--/--</span>
-            </div>
-            <div class="header-cell" data-day="2">
-              TUE <span class="day-date">--/--</span>
-            </div>
-            <div class="header-cell" data-day="3">
-              WED <span class="day-date">--/--</span>
-            </div>
-            <div class="header-cell" data-day="4">
-              THU <span class="day-date">--/--</span>
-            </div>
-            <div class="header-cell" data-day="5">
-              FRI <span class="day-date">--/--</span>
-            </div>
-            <div class="header-cell" data-day="6">
-              SAT <span class="day-date">--/--</span>
-            </div>
-          </div>
-
-          <!-- Grid Body -->
-          <div class="grid-body">
-            <div class="time-col">
-              <div class="time-slot">07:00</div>
-              <div class="time-slot">07:30</div>
-              <div class="time-slot">08:00</div>
-              <div class="time-slot">08:30</div>
-              <div class="time-slot">09:00</div>
-            </div>
-            <div class="events-area">
-              <div
-                class="event-card pink"
-                style="grid-column: 1; grid-row: 1 / span 2"
-              >
-                <div class="card-title">Emergency visit</div>
-                <div class="card-sub">West camp. Room 312</div>
-                <div class="card-time">07:00 - 08:00</div>
+          <div class="calendar-scroll" id="calendar-scroll">
+            <!-- Week view -->
+            <div class="week-view" id="week-view">
+              <!-- Grid Header -->
+              <div class="grid-header" id="grid-header">
+                <div class="header-cell time-zone">
+                  W <span id="week-number">--</span>
+                </div>
+                <div class="header-cell" data-day="1">
+                  Monday <span class="day-date">--/--</span>
+                </div>
+                <div class="header-cell" data-day="2">
+                  Tuesday <span class="day-date">--/--</span>
+                </div>
+                <div class="header-cell" data-day="3">
+                  Wednesday <span class="day-date">--/--</span>
+                </div>
+                <div class="header-cell" data-day="4">
+                  Thursday <span class="day-date">--/--</span>
+                </div>
+                <div class="header-cell" data-day="5">
+                  Friday <span class="day-date">--/--</span>
+                </div>
+                <div class="header-cell" data-day="6">
+                  Saturday <span class="day-date">--/--</span>
+                </div>
+                <div class="header-cell sunday" data-day="7">
+                  Sunday <span class="day-date">--/--</span>
+                </div>
               </div>
 
-              <div
-                class="event-card yellow"
-                style="grid-column: 1; grid-row: 3 / span 3"
-              >
-                <div class="card-title">Team planning</div>
-                <div class="card-sub">East camp. Room 200</div>
-                <div class="card-time">08:00 - 09:30</div>
-              </div>
-
-              <div
-                class="event-card blue"
-                style="grid-column: 3; grid-row: 2 / span 2"
-              >
-                <div class="card-title">Diagnostic test</div>
-                <div class="card-sub">West camp. Room 102</div>
-                <div class="card-time">07:30 - 08:30</div>
+              <!-- Grid Body: cột giờ + 7 cột ngày (tạo bằng JS) -->
+              <div class="grid-body" id="grid-body">
+                <div class="time-col" id="time-col"></div>
+                <div class="now-line" id="now-line" hidden>
+                  <span class="now-label" id="now-label">--:--</span>
+                </div>
               </div>
             </div>
+
+            <!-- Month view -->
+            <div class="month-view" id="month-view" hidden></div>
           </div>
         </div>
       </main>
     </div>
+
+    <!-- Modal thêm / sửa sự kiện -->
+    <div class="modal-backdrop" id="event-modal" hidden>
+      <form class="modal" id="event-form" novalidate>
+        <div class="modal-head">
+          <h3 id="modal-title">Add event</h3>
+          <button type="button" class="icon-btn" data-close aria-label="Đóng">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <label class="field">
+          <span>Title</span>
+          <input name="title" maxlength="60" placeholder="Emergency visit" required />
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Type</span>
+            <select name="type" id="type-select"></select>
+          </label>
+          <label class="field">
+            <span>Date</span>
+            <input type="date" name="date" required />
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field">
+            <span>Start</span>
+            <input type="time" name="start" step="300" required />
+          </label>
+          <label class="field">
+            <span>End</span>
+            <input type="time" name="end" step="300" required />
+          </label>
+        </div>
+        <label class="field">
+          <span>Location</span>
+          <input name="location" maxlength="60" placeholder="West camp, Room 312" />
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Participants</span>
+            <input name="participants" placeholder="TY, AB, NR, +3" />
+          </label>
+          <label class="field">
+            <span>Attachment</span>
+            <input name="attachment" maxlength="40" placeholder="Agenda.pdf" />
+          </label>
+        </div>
+        <label class="field" id="tag-field">
+          <span>Tag</span>
+          <input name="tag" maxlength="30" placeholder="Primary Care" />
+        </label>
+        <label class="field">
+          <span>Description</span>
+          <textarea name="description" rows="2" maxlength="200"></textarea>
+        </label>
+
+        <p class="form-error" id="form-error" hidden></p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost danger" id="delete-btn" hidden>Delete</button>
+          <span class="spacer"></span>
+          <button type="button" class="btn-ghost" data-close>Cancel</button>
+          <button type="submit" class="btn-add">Save</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Thông báo nhỏ -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
     <script src="script.js"></script>
   </body>
 </html>
