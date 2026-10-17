@@ -9,3 +9,12 @@
 +\_blank:mo qua tab moi
 +\_parent:trong khung cha hien tai, no se mo tai trang chinh neu k co
 +\_top:de len chuyen qua cai moi
+const / let	Biến không gán lại được / gán lại được
+`...${x}...`	Template literal, chèn biến vào chuỗi
+const [a, b] = arr	Destructuring, tách mảng ra từng biến
+[...arr], { ...obj }	Spread, sao chép mảng hoặc đối tượng
+(x) => ...	Arrow function, hàm viết gọn
+a ? b : c	Toán tử ba ngôi (if/else rút gọn)
+a || b	Lấy b nếu a là falsy (0, “”, null…)
+map / filter / forEach / findIndex	Biến đổi / lọc / duyệt / tìm vị trí trong mảng
+/.../g	Biểu thức chính quy, cờ g là toàn bộ
