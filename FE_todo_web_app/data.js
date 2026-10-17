@@ -1,7 +1,5 @@
 // ===== DỮ LIỆU CỐ ĐỊNH & DỮ LIỆU MẪU =====
-// Chỉ chứa dữ liệu, không có logic giao diện.
 // Cần utils.js được nạp trước (dùng getMonday, addDays, toDateKey).
-
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
