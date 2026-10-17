@@ -1,3 +1,6 @@
+// script.js: phần GIAO DIỆN của lịch (vẽ lịch, thẻ sự kiện, modal, nút bấm).
+// Hàm tiện ích nằm ở utils.js, dữ liệu cố định & dữ liệu mẫu nằm ở data.js.
+
 // ===== 1. CẤU HÌNH =====
 const START_HOUR = 7; // Lịch bắt đầu lúc 07:00
 const END_HOUR = 18; // và kết thúc lúc 18:00
@@ -5,26 +8,6 @@ const SLOT_MINUTES = 30; // Mỗi ô trên lưới = 30 phút
 const SLOT_HEIGHT = 100; // Chiều cao (px) của 1 ô 30 phút
 const PX_PER_MINUTE = SLOT_HEIGHT / SLOT_MINUTES;
 const STORAGE_KEY = "intelly-events";
-
-const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-// Mỗi loại sự kiện có icon, màu thẻ, màu icon và nhóm (dùng cho bộ lọc "In:")
-const EVENT_TYPES = {
-  emergency: { label: "Emergency visit", icon: "fa-stethoscope", color: "beige", iconColor: "pink", category: "patients" },
-  online: { label: "Online visit", icon: "fa-desktop", color: "beige", iconColor: "pink", category: "patients", joinable: true },
-  followup: { label: "Follow-up", icon: "fa-stethoscope", color: "beige", iconColor: "pink", category: "patients" },
-  diagnostic: { label: "Diagnostic test", icon: "fa-syringe", color: "beige", iconColor: "blue", category: "tests" },
-  prescription: { label: "Prescription", icon: "fa-prescription-bottle-medical", color: "beige", iconColor: "pink", category: "prescriptions" },
-  team: { label: "Team meeting", icon: "fa-people-group", color: "yellow", iconColor: "yellow", category: "tests" },
-  interns: { label: "Interns visit", icon: "fa-people-group", color: "blue", iconColor: "blue", category: "education" },
-  article: { label: "Education / article", icon: "fa-book-open", color: "beige", category: "education", isArticle: true },
-};
-
-const AVATAR_COLORS = ["#f6d867", "#a9b98a", "#b9c9ef", "#f4b6d2", "#e7c39c"];
 
 // ===== 2. DOM =====
 const toggleBtn = document.getElementById("toggle-btn");
@@ -92,67 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 60 * 1000);
 });
 
-// ===== 4. HÀM TIỆN ÍCH NGÀY GIỜ =====
-function pad(n) {
-  return String(n).padStart(2, "0");
-}
-
-function toDateKey(date) {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-function fromDateKey(key) {
-  const [y, m, d] = key.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function toMinutes(time) {
-  const [h, m] = time.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function formatShortDate(date) {
-  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}`;
-}
-
-function addDays(date, amount) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + amount);
-  return d;
-}
-
-function isSameDay(a, b) {
-  return a.toDateString() === b.toDateString();
-}
-
-// Tìm ngày Thứ 2 của tuần chứa `date`
-function getMonday(date) {
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const day = d.getDay(); // 0: Chủ Nhật, 1: T2, ..., 6: T7
-  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
-  return d;
-}
-
-// Số tuần theo chuẩn ISO (tuần bắt đầu từ Thứ 2)
-function getWeekNumber(date) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-}
-
-// Chống chèn HTML khi hiển thị chữ người dùng nhập
-function escapeHtml(text) {
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-// ===== 5. LƯU TRỮ DỮ LIỆU =====
+// ===== 4. LƯU TRỮ DỮ LIỆU =====
 function loadEvents() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -171,64 +94,7 @@ function saveEvents() {
   }
 }
 
-// Dữ liệu mẫu giống ảnh Example.jpg, luôn nằm ở tuần hiện tại
-function createSampleEvents() {
-  const monday = getMonday(new Date());
-  const day = (offset) => toDateKey(addDays(monday, offset));
-  const team = ["TY", "AB", "NR", "SS"];
-
-  const list = [
-    // Thứ 2
-    { type: "emergency", title: "Emergency visit", date: day(0), start: "07:00", end: "07:30", location: "West camp, Room 312" },
-    { type: "diagnostic", title: "Diagnostic test", date: day(0), start: "07:30", end: "07:55", location: "West camp, Room 312" },
-    { type: "team", title: "Team planning", date: day(0), start: "08:00", end: "09:00", location: "East camp, Room 200", attachment: "Agenda.pdf", participants: team, extra: 3 },
-    { type: "emergency", title: "Emergency visit", date: day(0), start: "09:00", end: "09:30", location: "West camp, Room 312" },
-    { type: "followup", title: "Follow-up", date: day(0), start: "10:30", end: "11:00", location: "West camp, Room 312" },
-    // Thứ 3
-    { type: "online", title: "Online visit", date: day(1), start: "07:00", end: "08:00", location: "West camp, Room 312", participants: ["TY"] },
-    { type: "diagnostic", title: "Diagnostic test", date: day(1), start: "08:00", end: "08:15", location: "West camp, Room 312" },
-    { type: "article", title: "Health systems in practice", date: day(1), start: "08:30", end: "10:00", tag: "Clinical Immunology", description: "Do you know how to optimally manage moderate to severe asthma in your patients?" },
-    // Thứ 4
-    { type: "followup", title: "Follow-up", date: day(2), start: "07:30", end: "08:00", location: "West camp, Room 312" },
-    { type: "interns", title: "Interns visit", date: day(2), start: "08:30", end: "09:30", location: "West camp, Conference room 404", participants: team, extra: 12 },
-    { type: "emergency", title: "Emergency visit", date: day(2), start: "09:40", end: "10:10", location: "West camp, Room 312" },
-    { type: "prescription", title: "Prescription review", date: day(2), start: "11:00", end: "11:30", location: "Pharmacy, Room 105" },
-    // Thứ 5
-    { type: "online", title: "Online visit", date: day(3), start: "07:00", end: "08:00", location: "West camp, Room 312", participants: ["TY"] },
-    { type: "article", title: "Chronic Kidney Disease", date: day(3), start: "08:15", end: "09:45", tag: "Primary Care", description: "What tools can you leverage to help maximize a co-management approach to caring for people with CKD" },
-    { type: "diagnostic", title: "Diagnostic test", date: day(3), start: "10:00", end: "10:30", location: "East camp, Lab 2" },
-    // Thứ 6
-    { type: "team", title: "Team results", date: day(4), start: "07:00", end: "08:00", location: "East camp, Room 200", attachment: "Agenda.pdf", participants: team, extra: 3 },
-    { type: "emergency", title: "Emergency visit", date: day(4), start: "08:00", end: "08:30", location: "West camp, Room 312" },
-    { type: "diagnostic", title: "Diagnostic test", date: day(4), start: "08:30", end: "08:55", location: "West camp, Room 312" },
-    { type: "interns", title: "Interns visit", date: day(4), start: "09:00", end: "10:00", location: "West camp, Conference room 404", participants: team, extra: 12 },
-    // Thứ 7
-    { type: "online", title: "Online visit", date: day(5), start: "07:30", end: "08:30", location: "West camp, Room 312", participants: ["TY"] },
-    { type: "followup", title: "Follow-up", date: day(5), start: "09:00", end: "09:30", location: "West camp, Room 312" },
-    // Buổi chiều
-    { type: "team", title: "Weekly sync", date: day(0), start: "14:00", end: "15:00", location: "East camp, Room 200", participants: ["AB", "NR"] },
-    { type: "online", title: "Online visit", date: day(1), start: "15:30", end: "16:30", location: "West camp, Room 312", participants: ["SS"] },
-    { type: "diagnostic", title: "Lab results", date: day(2), start: "14:30", end: "15:00", location: "East camp, Lab 2" },
-    { type: "article", title: "Hypertension update", date: day(3), start: "15:00", end: "16:30", tag: "Cardiology", description: "New guidelines on blood pressure targets for elderly patients." },
-    { type: "emergency", title: "Emergency visit", date: day(4), start: "13:30", end: "14:00", location: "West camp, Room 312" },
-    { type: "online", title: "Online visit", date: day(4), start: "16:00", end: "17:00", location: "West camp, Room 312", participants: ["TY", "AB"] },
-    { type: "interns", title: "Interns review", date: day(4), start: "15:00", end: "16:00", location: "West camp, Conference room 404", participants: team, extra: 5 },
-    { type: "followup", title: "Follow-up", date: day(5), start: "14:00", end: "14:30", location: "West camp, Room 312" },
-  ];
-
-  return list.map((ev, index) => ({
-    id: `sample-${index}`,
-    location: "",
-    participants: [],
-    extra: 0,
-    attachment: "",
-    tag: "",
-    description: "",
-    ...ev,
-  }));
-}
-
-// ===== 6. DỰNG KHUNG LƯỚI (chạy 1 lần) =====
+// ===== 5. DỰNG KHUNG LƯỚI (chạy 1 lần) =====
 function buildGrid() {
   // Cột giờ: 07:00, 07:30, 08:00, ...
   const slotCount = ((END_HOUR - START_HOUR) * 60) / SLOT_MINUTES;
@@ -257,7 +123,7 @@ function buildTypeOptions() {
     .join("");
 }
 
-// ===== 7. VẼ GIAO DIỆN =====
+// ===== 6. VẼ GIAO DIỆN =====
 function render() {
   const isMonth = currentView === "month";
   weekView.hidden = isMonth;
@@ -316,38 +182,6 @@ function renderWeek() {
   });
 
   updateNowLine();
-}
-
-// Nếu 2 sự kiện trùng giờ thì chia cột ra làm nhiều "làn" nằm cạnh nhau
-function layoutDayEvents(dayEvents) {
-  const sorted = [...dayEvents].sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
-  const result = [];
-  let cluster = [];
-  let clusterEnd = -1;
-
-  const flush = () => {
-    const laneEnds = [];
-    cluster.forEach((item) => {
-      let lane = laneEnds.findIndex((end) => end <= toMinutes(item.ev.start));
-      if (lane === -1) {
-        lane = laneEnds.length;
-        laneEnds.push(0);
-      }
-      laneEnds[lane] = toMinutes(item.ev.end);
-      item.lane = lane;
-    });
-    cluster.forEach((item) => result.push({ ...item, lanes: laneEnds.length }));
-    cluster = [];
-  };
-
-  sorted.forEach((ev) => {
-    if (cluster.length && toMinutes(ev.start) >= clusterEnd) flush();
-    cluster.push({ ev });
-    clusterEnd = Math.max(clusterEnd, toMinutes(ev.end));
-  });
-  if (cluster.length) flush();
-
-  return result;
 }
 
 function createEventCard(ev) {
@@ -495,7 +329,7 @@ function renderMonth() {
   monthView.innerHTML = html;
 }
 
-// ===== 8. TÌM KIẾM & BỘ LỌC =====
+// ===== 7. TÌM KIẾM & BỘ LỌC =====
 function matchesFilters(ev) {
   const type = EVENT_TYPES[ev.type] || EVENT_TYPES.emergency;
   if (activeCategories.size && !activeCategories.has(type.category)) return false;
@@ -507,7 +341,7 @@ function matchesFilters(ev) {
   return text.includes(searchQuery);
 }
 
-// ===== 9. MODAL THÊM / SỬA =====
+// ===== 8. MODAL THÊM / SỬA =====
 function openModal(ev, preset = {}) {
   editingId = ev ? ev.id : null;
   modalTitle.textContent = ev ? "Edit event" : "Add event";
@@ -559,17 +393,6 @@ function defaultDateKey() {
 
 function updateTagField() {
   tagField.hidden = typeSelect.value !== "article";
-}
-
-// "TY, AB, +3" => { participants: ["TY", "AB"], extra: 3 }
-function parseParticipants(text) {
-  const participants = [];
-  let extra = 0;
-  text.split(",").map((s) => s.trim()).filter(Boolean).forEach((token) => {
-    if (/^\+\d+$/.test(token)) extra += Number(token.slice(1));
-    else participants.push(token.slice(0, 3).toUpperCase());
-  });
-  return { participants, extra };
 }
 
 function handleSubmit(e) {
@@ -640,7 +463,7 @@ function deleteEvent(id) {
   });
 }
 
-// ===== 10. TOAST =====
+// ===== 9. TOAST =====
 let toastTimer;
 
 function showToast(message, action) {
@@ -664,7 +487,7 @@ function showToast(message, action) {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 4000);
 }
 
-// ===== 11. GẮN SỰ KIỆN =====
+// ===== 10. GẮN SỰ KIỆN =====
 function autoCollapseSidebar() {
   const media = window.matchMedia("(max-width: 1000px)");
   const apply = () => {
