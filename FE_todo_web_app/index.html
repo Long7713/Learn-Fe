@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,7 +22,7 @@
       <aside class="sidebar" id="sidebar">
         <div class="logo">
           <h2>intelly</h2>
-          <button id="toggle-btn" class="toggle-btn" aria-label="Thu gọn menu">
+          <button id="toggle-btn" class="toggle-btn" aria-label="Collapse menu">
             <i class="fa-solid fa-chevron-left"></i>
           </button>
         </div>
@@ -100,9 +100,9 @@
             </div>
           </div>
           <div class="user-actions">
-            <button class="icon-btn dark" aria-label="Tài khoản"><i class="fa-regular fa-user"></i></button>
-            <button class="icon-btn dark" aria-label="Thông báo"><i class="fa-regular fa-bell"></i></button>
-            <button class="icon-btn dark" aria-label="Cài đặt"><i class="fa-solid fa-gear"></i></button>
+            <button class="icon-btn dark" aria-label="Account"><i class="fa-regular fa-user"></i></button>
+            <button class="icon-btn dark" aria-label="Notifications"><i class="fa-regular fa-bell"></i></button>
+            <button class="icon-btn dark" aria-label="Settings"><i class="fa-solid fa-gear"></i></button>
           </div>
         </header>
 
@@ -111,10 +111,10 @@
           <h1>Stay up to date, Long</h1>
           <div class="action-buttons">
             <button class="btn-add" id="add-btn">Add event</button>
-            <button class="icon-btn" id="refresh-btn" aria-label="Làm mới lịch" title="Refresh">
+            <button class="icon-btn" id="refresh-btn" aria-label="Refresh calendar" title="Refresh">
               <i class="fa-solid fa-arrows-rotate"></i>
             </button>
-            <button class="icon-btn" id="edit-btn" aria-label="Chế độ chỉnh sửa" title="Edit mode">
+            <button class="icon-btn" id="edit-btn" aria-label="Edit mode" title="Edit mode">
               <i class="fa-solid fa-pen"></i>
             </button>
           </div>
@@ -124,11 +124,11 @@
         <div class="calendar-container">
           <div class="calendar-header">
             <div class="date-picker">
-              <button class="nav-btn" id="prev-btn" aria-label="Trước"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="nav-btn" id="prev-btn" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
               <button class="btn-date" id="btn-date">
                 <span id="date-range">-- / --</span> <i class="fa-solid fa-chevron-down"></i>
               </button>
-              <button class="nav-btn" id="next-btn" aria-label="Sau"><i class="fa-solid fa-chevron-right"></i></button>
+              <button class="nav-btn" id="next-btn" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
               <input type="date" id="week-picker" class="week-picker" tabindex="-1" aria-hidden="true" />
             </div>
             <div class="view-options">
@@ -190,7 +190,7 @@
       <form class="modal" id="event-form" novalidate>
         <div class="modal-head">
           <h3 id="modal-title">Add event</h3>
-          <button type="button" class="icon-btn" data-close aria-label="Đóng">
+          <button type="button" class="icon-btn" data-close aria-label="Close">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -255,10 +255,9 @@
 
     <!-- Thông báo nhỏ -->
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <!-- Thứ tự quan trọng: file sau dùng hàm/biến của file trước -->
     <script src="utils.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
+    <script src="storage.js"></script>
   </body>
 </html>
