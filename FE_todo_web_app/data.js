@@ -18,7 +18,12 @@ const EVENT_TYPES = {
   article: { label: "Education / article", icon: "fa-book-open", color: "beige", category: "education", isArticle: true },
 };
 
-const AVATAR_COLORS = ["#f6d867", "#a9b98a", "#b9c9ef", "#f4b6d2", "#e7c39c"];
+// Lấy thông tin loại của 1 sự kiện (loại lạ thì coi như "emergency")
+function getEventType(ev) {
+  return EVENT_TYPES[ev.type] || EVENT_TYPES.emergency;
+}
+
+const AVATAR_COLORS =["#f6d867", "#a9b98a", "#b9c9ef", "#f4b6d2", "#e7c39c"];
 
 // Dữ liệu mẫu giống ảnh Example.jpg, luôn nằm ở tuần hiện tại
 function createSampleEvents() {
