@@ -1,13 +1,9 @@
-// script.js: phần GIAO DIỆN của lịch (vẽ lịch, thẻ sự kiện, modal, nút bấm).
-// Hàm tiện ích nằm ở utils.js, dữ liệu cố định & dữ liệu mẫu nằm ở data.js.
-
-// ===== 1. CẤU HÌNH =====
+// ===== 1. CẤU HÌNH LƯỚI LỊCH =====
 const START_HOUR = 7; // Lịch bắt đầu lúc 07:00
 const END_HOUR = 18; // và kết thúc lúc 18:00
 const SLOT_MINUTES = 30; // Mỗi ô trên lưới = 30 phút
 const SLOT_HEIGHT = 100; // Chiều cao (px) của 1 ô 30 phút
 const PX_PER_MINUTE = SLOT_HEIGHT / SLOT_MINUTES;
-const STORAGE_KEY = "intelly-events";
 
 // ===== 2. DOM =====
 const toggleBtn = document.getElementById("toggle-btn");
@@ -52,7 +48,7 @@ const toast = document.getElementById("toast");
 let dayColumns = [];
 
 // ===== 3. STATE =====
-let events = loadEvents();
+let events = []; // Nạp qua storage.js khi trang mở
 let currentDate = new Date(); // Ngày "neo" để biết đang xem tuần/tháng nào
 let currentView = "week";
 let searchQuery = "";
@@ -60,13 +56,15 @@ const activeCategories = new Set();
 let editMode = false;
 let editingId = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   document.documentElement.style.setProperty("--slot-height", `${SLOT_HEIGHT}px`);
   buildGrid();
   buildTypeOptions();
   bindEvents();
   autoCollapseSidebar();
-  render();
+  render(); // Vẽ khung trống trước trong lúc chờ dữ liệu
+
+  await reloadEvents();
   scrollToNow();
 
   // Mỗi phút vẽ lại để đường giờ hiện tại và nút Join luôn đúng
@@ -75,22 +73,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 60 * 1000);
 });
 
-// ===== 4. LƯU TRỮ DỮ LIỆU =====
-function loadEvents() {
+// ===== 4. GỌI LƯU TRỮ (storage.js) =====
+// Nạp lại toàn bộ sự kiện rồi vẽ lại. Trả về true nếu nạp thành công.
+async function reloadEvents() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    events = await loadEvents();
+    return true;
   } catch (error) {
-    console.warn("Không đọc được dữ liệu đã lưu", error);
+    console.error("Không tải được sự kiện:", error);
+    showToast("Couldn't load events");
+    return false;
+  } finally {
+    render();
   }
-  return createSampleEvents();
 }
 
-function saveEvents() {
+// Chạy 1 thao tác lưu (add/update/remove), lỗi thì báo cho người dùng
+async function persist(action) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    await action();
   } catch (error) {
-    console.warn("Không lưu được dữ liệu", error);
+    console.error("Không lưu được thay đổi:", error);
+    showToast("Couldn't save your change");
   }
 }
 
@@ -99,15 +103,14 @@ function buildGrid() {
   // Cột giờ: 07:00, 07:30, 08:00, ...
   const slotCount = ((END_HOUR - START_HOUR) * 60) / SLOT_MINUTES;
   for (let i = 0; i < slotCount; i++) {
-    const minutes = START_HOUR * 60 + i * SLOT_MINUTES;
     const slot = document.createElement("div");
     slot.className = "time-slot";
-    slot.innerHTML = `<span>${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}</span>`;
+    slot.innerHTML = `<span>${toTime(START_HOUR * 60 + i * SLOT_MINUTES)}</span>`;
     timeCol.appendChild(slot);
   }
 
   // 7 cột ngày, mỗi cột chứa các thẻ sự kiện
-  dayColumns = DAY_NAMES.map((name, index) => {
+  dayColumns = DAY_NAMES.map((_, index) => {
     const column = document.createElement("div");
     column.className = "day-column";
     if (index === 6) column.classList.add("sunday");
@@ -185,7 +188,7 @@ function renderWeek() {
 }
 
 function createEventCard(ev) {
-  const type = EVENT_TYPES[ev.type] || EVENT_TYPES.emergency;
+  const type = getEventType(ev);
   const duration = toMinutes(ev.end) - toMinutes(ev.start);
   const hasParticipants = ev.participants.length > 0 || ev.extra > 0;
   const timeHtml = `<div class="card-time">${ev.start} - ${ev.end}</div>`;
@@ -210,7 +213,7 @@ function createEventCard(ev) {
     parts.push(`
       <div class="card-top">
         <span class="card-icon ${type.iconColor}"><i class="fa-solid ${type.icon}"></i></span>
-        <button class="card-more" data-action="edit" aria-label="Sửa sự kiện">
+        <button class="card-more" data-action="edit" aria-label="Edit event">
           <i class="fa-solid fa-ellipsis-vertical"></i>
         </button>
       </div>`);
@@ -231,7 +234,7 @@ function createEventCard(ev) {
     else if (hasParticipants) parts.push(timeHtml);
   }
 
-  parts.push(`<button class="card-delete" data-action="delete" aria-label="Xoá sự kiện">
+  parts.push(`<button class="card-delete" data-action="delete" aria-label="Delete event">
     <i class="fa-solid fa-xmark"></i></button>`);
 
   card.innerHTML = parts.join("");
@@ -266,26 +269,24 @@ function createJoinButton(ev) {
   if (now >= start) {
     return `<button class="btn-join live" data-action="join">In progress...</button>`;
   }
-  const extraClass = EVENT_TYPES[ev.type]?.isArticle ? "" : "muted";
+  const extraClass = getEventType(ev).isArticle ? "" : "muted";
   return `<button class="btn-join ${extraClass}" data-action="join">Join</button>`;
 }
 
 function updateNowLine() {
-  const now = new Date();
-  const minutes = now.getHours() * 60 + now.getMinutes() - START_HOUR * 60;
-  const isThisWeek = isSameDay(getMonday(now), getMonday(currentDate));
+  const minutes = nowMinutes() - START_HOUR * 60; // số phút tính từ đầu lưới (07:00)
+  const isThisWeek = isSameDay(getMonday(new Date()), getMonday(currentDate));
   const inRange = minutes >= 0 && minutes <= (END_HOUR - START_HOUR) * 60;
 
   nowLine.hidden = !(currentView === "week" && isThisWeek && inRange);
   if (nowLine.hidden) return;
 
   nowLine.style.top = `${minutes * PX_PER_MINUTE}px`;
-  nowLabel.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  nowLabel.textContent = toTime(nowMinutes());
 }
 
 function scrollToNow() {
-  const now = new Date();
-  const minutes = now.getHours() * 60 + now.getMinutes() - START_HOUR * 60;
+  const minutes = nowMinutes() - START_HOUR * 60;
   const top = Math.max(0, minutes * PX_PER_MINUTE - SLOT_HEIGHT);
   calendarScroll.scrollTo({ top: currentView === "week" ? top : 0, behavior: "smooth" });
 }
@@ -313,7 +314,7 @@ function renderMonth() {
     if (isSameDay(date, today)) classes.push("is-today");
 
     const items = dayEvents.slice(0, 3).map((ev) => {
-      const color = (EVENT_TYPES[ev.type] || EVENT_TYPES.emergency).color;
+      const color = getEventType(ev).color;
       const dimmed = matchesFilters(ev) ? "" : "dimmed";
       return `<span class="month-event ${color} ${dimmed}">${ev.start} ${escapeHtml(ev.title)}</span>`;
     });
@@ -331,7 +332,7 @@ function renderMonth() {
 
 // ===== 7. TÌM KIẾM & BỘ LỌC =====
 function matchesFilters(ev) {
-  const type = EVENT_TYPES[ev.type] || EVENT_TYPES.emergency;
+  const type = getEventType(ev);
   if (activeCategories.size && !activeCategories.has(type.category)) return false;
   if (!searchQuery) return true;
 
@@ -411,7 +412,7 @@ function handleSubmit(e) {
     ...parseParticipants(fd.get("participants")),
   };
 
-  const error = validateEvent(data);
+  const error = validateForm(data);
   if (error) {
     formError.textContent = error;
     formError.hidden = false;
@@ -420,20 +421,24 @@ function handleSubmit(e) {
 
   if (editingId) {
     const index = events.findIndex((ev) => ev.id === editingId);
-    events[index] = { ...events[index], ...data };
+    if (index === -1) return closeModal(); // sự kiện đã bị xoá trong lúc đang sửa
+    const updated = { ...events[index], ...data };
+    events[index] = updated;
     showToast(`Updated "${data.title}"`);
+    persist(() => updateEvent(updated));
   } else {
-    events.push({ id: `ev-${Date.now().toString(36)}`, ...data });
+    const created = { id: createId(), ...data };
+    events.push(created);
     showToast(`Added "${data.title}"`);
+    persist(() => addEvent(created));
   }
 
-  saveEvents();
   closeModal();
   currentDate = fromDateKey(data.date);
   render();
 }
 
-function validateEvent(data) {
+function validateForm(data) {
   if (!data.title) return "Please enter a title.";
   if (!data.date) return "Please choose a date.";
   if (!data.start || !data.end) return "Please choose start and end time.";
@@ -441,7 +446,7 @@ function validateEvent(data) {
   const end = toMinutes(data.end);
   if (end <= start) return "End time must be after start time.";
   if (start < START_HOUR * 60 || end > END_HOUR * 60) {
-    return `Time must be between ${pad(START_HOUR)}:00 and ${pad(END_HOUR)}:00.`;
+    return `Time must be between ${toTime(START_HOUR * 60)} and ${toTime(END_HOUR * 60)}.`;
   }
   return "";
 }
@@ -451,16 +456,16 @@ function deleteEvent(id) {
   if (index === -1) return;
 
   const [removed] = events.splice(index, 1);
-  saveEvents();
   render();
   showToast(`Deleted "${removed.title}"`, {
     label: "Undo",
     onClick: () => {
       events.splice(index, 0, removed);
-      saveEvents();
       render();
+      persist(() => addEvent(removed));
     },
   });
+  persist(() => removeEvent(id));
 }
 
 // ===== 9. TOAST =====
@@ -531,12 +536,12 @@ function bindEvents() {
   // Nút hành động
   addBtn.addEventListener("click", () => openModal(null));
 
-  refreshBtn.addEventListener("click", () => {
-    events = loadEvents();
+  // Tải lại dữ liệu mới nhất (ví dụ người khác vừa thêm sự kiện)
+  refreshBtn.addEventListener("click", async () => {
     currentDate = new Date();
-    render();
+    const ok = await reloadEvents();
     scrollToNow();
-    showToast("Calendar refreshed");
+    if (ok) showToast("Calendar refreshed");
   });
 
   editBtn.addEventListener("click", () => {
@@ -591,11 +596,7 @@ function bindEvents() {
       const startMin = START_HOUR * 60 + Math.floor(y / SLOT_HEIGHT) * SLOT_MINUTES;
       const endMin = Math.min(startMin + SLOT_MINUTES, END_HOUR * 60);
       const date = addDays(getMonday(currentDate), Number(column.dataset.index));
-      openModal(null, {
-        date: toDateKey(date),
-        start: `${pad(Math.floor(startMin / 60))}:${pad(startMin % 60)}`,
-        end: `${pad(Math.floor(endMin / 60))}:${pad(endMin % 60)}`,
-      });
+      openModal(null, { date: toDateKey(date), start: toTime(startMin), end: toTime(endMin) });
       return;
     }
 
