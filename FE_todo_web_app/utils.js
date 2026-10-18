@@ -1,7 +1,5 @@
 // ===== HÀM TIỆN ÍCH =====
 // Các hàm "thuần": nhận dữ liệu vào, trả kết quả ra, không đụng tới HTML trên trang.
-// File này phải được nạp TRƯỚC data.js và script.js (xem thứ tự <script> trong index.html).
-
 // ----- Ngày giờ -----
 function pad(n) {
   return String(n).padStart(2, "0");
@@ -16,9 +14,21 @@ function fromDateKey(key) {
   return new Date(y, m - 1, d);
 }
 
+// "07:30" -> 450 (phút tính từ 00:00)
 function toMinutes(time) {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
+}
+
+// 450 -> "07:30"
+function toTime(minutes) {
+  return `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
+}
+
+// Số phút từ 00:00 đến bây giờ (ví dụ đang 07:30 -> 450)
+function nowMinutes() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
 }
 
 function formatShortDate(date) {
@@ -43,7 +53,7 @@ function getMonday(date) {
   return d;
 }
 
-// Số tuần theo chuẩn ISO (tuần bắt đầu từ Thứ 2)
+// Số tuần theo chuẩn ISO
 function getWeekNumber(date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
@@ -96,6 +106,13 @@ function layoutDayEvents(dayEvents) {
 }
 
 // ----- Form -----
+// Tạo id không trùng cho sự kiện mới (dùng làm khoá chính trên Supabase)
+function createId() {
+  if (window.crypto?.randomUUID) return crypto.randomUUID();
+  // Trình duyệt cũ không có randomUUID thì ghép thời gian + số ngẫu nhiên
+  return `ev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 // "TY, AB, +3" => { participants: ["TY", "AB"], extra: 3 }
 function parseParticipants(text) {
   const participants = [];
