@@ -131,6 +131,10 @@
               <button class="nav-btn" id="next-btn" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
               <input type="date" id="week-picker" class="week-picker" tabindex="-1" aria-hidden="true" />
             </div>
+            <!-- Hiện khi mất kết nối Supabase -->
+            <span class="sync-status" id="sync-status" hidden>
+              <i class="fa-solid fa-cloud-arrow-up"></i> Offline – changes are saved on this device
+            </span>
             <div class="view-options">
               <button class="view-btn" data-view="today">Today</button>
               <button class="view-btn active" data-view="week">Week</button>
@@ -198,48 +202,58 @@
         <label class="field">
           <span>Title</span>
           <input name="title" maxlength="60" placeholder="Emergency visit" required />
+          <small class="field-error" data-error-for="title" hidden></small>
         </label>
         <div class="field-row">
           <label class="field">
             <span>Type</span>
             <select name="type" id="type-select"></select>
+            <small class="field-error" data-error-for="type" hidden></small>
           </label>
           <label class="field">
             <span>Date</span>
             <input type="date" name="date" required />
+            <small class="field-error" data-error-for="date" hidden></small>
           </label>
         </div>
         <div class="field-row">
           <label class="field">
             <span>Start</span>
             <input type="time" name="start" step="300" required />
+            <small class="field-error" data-error-for="start" hidden></small>
           </label>
           <label class="field">
             <span>End</span>
             <input type="time" name="end" step="300" required />
+            <small class="field-error" data-error-for="end" hidden></small>
           </label>
         </div>
         <label class="field">
           <span>Location</span>
           <input name="location" maxlength="60" placeholder="West camp, Room 312" />
+          <small class="field-error" data-error-for="location" hidden></small>
         </label>
         <div class="field-row">
           <label class="field">
             <span>Participants</span>
             <input name="participants" placeholder="TY, AB, NR, +3" />
+            <small class="field-error" data-error-for="participants" hidden></small>
           </label>
           <label class="field">
             <span>Attachment</span>
             <input name="attachment" maxlength="40" placeholder="Agenda.pdf" />
+            <small class="field-error" data-error-for="attachment" hidden></small>
           </label>
         </div>
         <label class="field" id="tag-field">
           <span>Tag</span>
           <input name="tag" maxlength="30" placeholder="Primary Care" />
+          <small class="field-error" data-error-for="tag" hidden></small>
         </label>
         <label class="field">
           <span>Description</span>
           <textarea name="description" rows="2" maxlength="200"></textarea>
+          <small class="field-error" data-error-for="description" hidden></small>
         </label>
 
         <p class="form-error" id="form-error" hidden></p>
@@ -255,9 +269,14 @@
 
     <!-- Thông báo nhỏ -->
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Thư viện Supabase (khoá cứng phiên bản để không tự đổi) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+    <!-- Thứ tự quan trọng: file được dùng đặt trước, file đi dùng đặt sau -->
+    <script src="config.js"></script>
     <script src="utils.js"></script>
     <script src="data.js"></script>
-    <script src="script.js"></script>
     <script src="storage.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>
