@@ -113,6 +113,27 @@ function createId() {
   return `ev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+// Kiểm tra ô Participants trước khi đọc. Trả về câu báo lỗi, hợp lệ thì trả về "".
+// Mỗi mục là tên viết tắt 1–3 ký tự (TY) hoặc số người thêm (+3), cách nhau bằng dấu phẩy.
+function checkParticipants(text) {
+  const tokens = text.split(",").map((s) => s.trim()).filter(Boolean);
+  let names = 0;
+  let extra = 0;
+
+  for (const token of tokens) {
+    if (/^\+\d+$/.test(token)) {
+      extra += Number(token.slice(1));
+    } else if (/^[\p{L}\d]{1,3}$/u.test(token)) {
+      names += 1;
+    } else {
+      return `"${token}" is not valid. Use initials of 1–3 letters (e.g. TY) or a number like +3.`;
+    }
+  }
+  if (names > 20) return "Up to 20 participants.";
+  if (extra > 999) return "The extra number (+…) must be 999 or less.";
+  return "";
+}
+
 // "TY, AB, +3" => { participants: ["TY", "AB"], extra: 3 }
 function parseParticipants(text) {
   const participants = [];
