@@ -1059,6 +1059,29 @@ body {
   color: #b42318;
 }
 
+/* Ô nhập sai: viền đỏ + câu báo lỗi ngay bên dưới */
+.field.invalid input,
+.field.invalid select,
+.field.invalid textarea {
+  border-color: #b42318;
+}
+
+.field-error {
+  font-size: 11px;
+  color: #b42318;
+}
+
+/* Nhãn "Offline" cạnh nút chọn ngày */
+.sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 14px;
+  background: var(--pink-soft);
+  font-size: 11px;
+}
+
 .modal-actions {
   display: flex;
   align-items: center;
