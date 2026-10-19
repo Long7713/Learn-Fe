@@ -10,6 +10,7 @@ Mục lục
   - [2.3 DOM – JS điều khiển HTML](#23-dom--js-điều-khiển-html)
   - [2.4 Hàm tự viết trong dự án](#24-hàm-tự-viết-trong-dự-án)
   - [2.5 Biến / hằng quan trọng](#25-biến--hằng-quan-trọng)
+- [Phần 3 – Supabase (lưu dữ liệu online)](#phần-3--supabase-lưu-dữ-liệu-online)
 
 ---
 
@@ -29,7 +30,7 @@ Thẻ viết dạng `<tên>...</tên>`. Một số thẻ không có thẻ đóng
 | `<title>` | Title | Tên trang hiện trên tab trình duyệt | "Intelly Dashboard" |
 | `<link>` | Link | Nạp file bên ngoài (CSS, font) | `index.css`, Google Fonts, Font Awesome |
 | `<body>` | Body | Phần nội dung hiện ra màn hình | |
-| `<script>` | Script | Nạp / chạy JavaScript | `utils.js`, `data.js`, `storage.js`, `script.js` |
+| `<script>` | Script | Nạp / chạy JavaScript | thư viện supabase-js (CDN), `config.js`, `utils.js`, `data.js`, `storage.js`, `script.js` |
 
 **Bố cục có ý nghĩa (semantic)** – giống `<div>` nhưng cho biết vai trò của vùng đó
 
@@ -49,7 +50,8 @@ Thẻ viết dạng `<tên>...</tên>`. Một số thẻ không có thẻ đóng
 | --- | --- | --- | --- |
 | `<h1>` `<h2>` `<h3>` | Heading 1–3 | Tiêu đề, số càng nhỏ càng quan trọng | h1: lời chào, h2: logo, h3: tiêu đề modal |
 | `<p>` | Paragraph | Định nghĩa các đoạn văn | "General", "Tools", mô tả bài viết |
-| `<span>` | Span | Bọc 1 đoạn chữ nhỏ nằm trên cùng dòng | ngày `--/--`, avatar, nhãn |
+| `<span>` | Span | Bọc 1 đoạn chữ nhỏ nằm trên cùng dòng | ngày `--/--`, avatar, nhãn "Offline" |
+| `<small>` | Small | Chữ phụ, cỡ nhỏ (ghi chú, cảnh báo) | câu báo lỗi dưới từng ô trong form |
 | `<i>` | Idiomatic Text / Icon | Gốc là chữ in nghiêng, nhưng ngày nay chủ yếu dùng để chèn icon bằng thư viện như Font Awesome | `<i class="fa-solid fa-gear">` |
 
 **Danh sách & liên kết**
@@ -126,6 +128,7 @@ Thuộc tính viết bên trong thẻ mở: `<thẻ tên="giá trị">`.
 | `aria-label` | Tên đọc lên cho nút chỉ có icon | `aria-label="Close"` |
 | `aria-hidden` | Ẩn khỏi trình đọc màn hình | ô chọn ngày ẩn |
 | `aria-live` | Đọc lên khi nội dung thay đổi | toast thông báo |
+| `aria-invalid` | Báo ô nhập đang sai | JS gán `"true"` khi ô có lỗi |
 | `role` | Vai trò của phần tử | `role="status"` |
 
 **Thuộc tính tự đặt `data-*`** – gắn thêm dữ liệu vào thẻ, JS đọc bằng `element.dataset`
@@ -139,6 +142,7 @@ Thuộc tính viết bên trong thẻ mở: `<thẻ tên="giá trị">`.
 | `data-id` | `card.dataset.id` | id sự kiện trên thẻ (gán bằng JS) |
 | `data-action="delete"` | `...dataset.action` | biết bấm nút nào trong thẻ (edit/delete/join) |
 | `data-date="2026-10-19"` | `cell.dataset.date` | ô ngày trong chế độ Month |
+| `data-error-for="title"` | `el.dataset.errorFor` | chỗ hiện lỗi này thuộc ô nào trong form |
 
 ---
 
@@ -161,6 +165,10 @@ Thuộc tính viết bên trong thẻ mở: `<thẻ tên="giá trị">`.
 | `!` / `===` / `%` | Phủ định / so sánh bằng (cả kiểu) / chia lấy dư | `minutes % 60` |
 | `/.../g` | Biểu thức chính quy (regex), cờ `g` là thay toàn bộ | `/&/g`, `/^\+\d+$/` |
 | `for (...) { break; }` | Vòng lặp, `break` để thoát sớm | vẽ lưới tháng |
+| `for (const x of arr)` | Duyệt từng phần tử, dùng được `return` để dừng hẳn hàm | `checkParticipants` |
+| `while (điều kiện)` | Lặp khi điều kiện còn đúng | đẩy lần lượt hàng chờ lên Supabase |
+| `const { a, ...rest } = obj` | Tách 1 trường ra, phần còn lại gom vào `rest` | bỏ `participantsText` khỏi dữ liệu form |
+| `/[\p{L}\d]/u` | Regex có cờ `u`: `\p{L}` là mọi chữ cái (kể cả tiếng Việt) | kiểm tra tên viết tắt |
 | `new X()` | Tạo object mới | `new Date()`, `new Set()`, `new FormData(form)` |
 | `async` / `await` | Hàm bất đồng bộ / chờ kết quả (dùng khi lưu dữ liệu) | `events = await loadEvents()` |
 | `try / catch / finally` | Thử chạy / bắt lỗi / luôn chạy cuối | `reloadEvents()`, `persist()` |
@@ -215,13 +223,17 @@ Thuộc tính viết bên trong thẻ mở: `<thẻ tên="giá trị">`.
 | --- | --- |
 | `Math.floor` / `Math.ceil` / `Math.max` / `Math.min` / `Math.random` | Làm tròn xuống / lên, lớn nhất, nhỏ nhất, số ngẫu nhiên |
 | `Number(x)` | Đổi sang số |
-| `Object.entries(obj)` | Object → mảng các cặp `[key, value]` |
+| `Object.entries(obj)` / `Object.keys(obj)` | Object → mảng các cặp `[key, value]` / mảng các key |
 | `new Set()` + `add` / `delete` / `has` / `size` | Tập hợp không trùng (bộ lọc đang bật) |
 | `JSON.stringify` / `JSON.parse` | Object → chuỗi / chuỗi → object (để lưu localStorage) |
 | `crypto.randomUUID()` | Tạo id ngẫu nhiên không trùng |
 | `setTimeout` / `clearTimeout` / `setInterval` | Chạy sau x ms / huỷ / lặp lại mỗi x ms |
 | `console.warn` / `console.error` | In cảnh báo / lỗi ra Console (F12) |
 | `localStorage.getItem` / `setItem` | Đọc / ghi dữ liệu lưu trên trình duyệt |
+| `fetch(url, options)` | Gửi request lên server (supabase-js dùng bên trong) |
+| `new AbortController()` + `abort()` | Huỷ 1 request đang chờ (dùng để giới hạn 8 giây) |
+| `navigator.onLine` | Trình duyệt có đang báo là có mạng không |
+| `promise.finally(fn)` | Chạy `fn` khi Promise xong, dù thành công hay lỗi |
 
 ### 2.3 DOM – JS điều khiển HTML
 
@@ -251,6 +263,7 @@ Thuộc tính viết bên trong thẻ mở: `<thẻ tên="giá trị">`.
 | `el.value` | Giá trị ô nhập |
 | `el.tabIndex` | Cho phép Tab tới |
 | `el.focus()` / `el.click()` | Đặt con trỏ vào / giả lập bấm |
+| `el.setAttribute("aria-invalid", "true")` | Đặt 1 thuộc tính HTML |
 | `el.getBoundingClientRect()` | Vị trí, kích thước trên màn hình |
 | `el.scrollTo({ top })` | Cuộn tới vị trí |
 | `input.showPicker()` | Mở bảng chọn ngày của trình duyệt |
@@ -270,10 +283,20 @@ Thuộc tính viết bên trong thẻ mở: `<thẻ tên="giá trị">`.
 | `form.elements["title"]` | Lấy ô nhập trong form theo `name` |
 | `new FormData(form)` + `fd.get("title")` | Đọc toàn bộ dữ liệu form |
 | `window.matchMedia("(max-width: 1000px)")` | Kiểm tra kích thước màn hình (giống `@media` trong CSS) |
+| `window.addEventListener("online", fn)` | Trình duyệt báo vừa có mạng lại |
+| `window.dispatchEvent(new Event("tên"))` | Tự phát 1 "tín hiệu" để file khác nghe (storage.js → script.js) |
 
 ### 2.4 Hàm tự viết trong dự án
 
-Thứ tự nạp trong `index.html`: `utils.js` → `data.js` → `script.js` → `storage.js`
+Thứ tự nạp trong `index.html`: supabase-js (CDN) → `config.js` → `utils.js` → `data.js` → `storage.js` → `script.js`
+(file được dùng đặt trước, file đi dùng đặt sau)
+
+**`config.js` – thông tin kết nối Supabase** (bạn tự điền, xem [Phần 3](#phần-3--supabase-lưu-dữ-liệu-online))
+
+| Hằng | Làm gì |
+| --- | --- |
+| `SUPABASE_URL` | Địa chỉ project, dạng `https://xxxxx.supabase.co` |
+| `SUPABASE_KEY` | Publishable key (`sb_publishable_...`) hoặc anon key |
 
 **`utils.js` – hàm tiện ích (chỉ tính toán, không đụng HTML)**
 
@@ -293,7 +316,8 @@ Thứ tự nạp trong `index.html`: `utils.js` → `data.js` → `script.js` �
 | `escapeHtml(text)` | Chống chèn HTML khi hiện chữ người dùng nhập | `"<b>"` → `"&lt;b&gt;"` |
 | `layoutDayEvents(list)` | Chia làn cho các sự kiện trùng giờ | → `[{ ev, lane, lanes }]` |
 | `createId()` | Tạo id không trùng cho sự kiện mới | → `"8151a767-…"` |
-| `parseParticipants(text)` | Đọc ô Participants | `"TY, AB, +3"` → `{ participants: ["TY","AB"], extra: 3 }` |
+| `checkParticipants(text)` | Kiểm tra ô Participants, trả về câu báo lỗi (hợp lệ thì `""`) | `"TY, ABCD"` → `"\"ABCD\" is not valid..."` |
+| `parseParticipants(text)` | Đọc ô Participants (sau khi đã kiểm tra) | `"TY, AB, +3"` → `{ participants: ["TY","AB"], extra: 3 }` |
 
 **`data.js` – dữ liệu cố định & dữ liệu mẫu**
 
@@ -303,24 +327,33 @@ Thứ tự nạp trong `index.html`: `utils.js` → `data.js` → `script.js` �
 | `EVENT_TYPES` | 8 loại sự kiện: tên, icon, màu, nhóm lọc |
 | `AVATAR_COLORS` | Màu nền avatar |
 | `getEventType(ev)` | Lấy thông tin loại của 1 sự kiện (loại lạ → `emergency`) |
-| `createSampleEvents()` | Tạo 29 sự kiện mẫu nằm trong tuần hiện tại |
+| `createSampleEvents()` | Tạo 29 sự kiện mẫu trong tuần hiện tại (**hiện chưa dùng**: đã chọn bảng trống thì lịch trống) |
 
-**`storage.js` – lưu trữ ("ổ cắm", Ngày 3 thay sang Supabase)**
+**`storage.js` – lưu trữ (Supabase + bản sao trên máy)**
 
-| Hàm | Làm gì |
-| --- | --- |
-| `loadEvents()` | Lấy toàn bộ sự kiện (lần đầu: ghi dữ liệu mẫu vào) |
-| `addEvent(ev)` | Thêm 1 sự kiện |
-| `updateEvent(ev)` | Sửa 1 sự kiện (tìm theo `id`) |
-| `removeEvent(id)` | Xoá 1 sự kiện |
-| `readAll()` / `writeAll(list)` | Đọc / ghi localStorage (chỉ dùng trong file này) |
+| Nhóm | Hàm | Làm gì |
+| --- | --- | --- |
+| script.js gọi | `loadEvents()` | Lấy toàn bộ sự kiện từ Supabase (mất mạng → lấy bản sao trên máy) |
+| | `addEvent(ev)` / `updateEvent(ev)` | Thêm / sửa 1 sự kiện (đều dùng "upsert") |
+| | `removeEvent(id)` | Xoá 1 sự kiện |
+| Lưu | `save(change)` | Cập nhật bản sao, gửi lên Supabase; mất mạng thì cho vào hàng chờ |
+| | `send(change)` | Gửi 1 thay đổi: `true` = xong, `false` = mất mạng, ném lỗi = database từ chối |
+| Đồng bộ | `syncPending()` / `pushPending()` | Đẩy lần lượt hàng chờ lên Supabase (không cho chạy 2 lần cùng lúc) |
+| | `tryReconnect()` | Có mạng lại (hoặc mỗi 30 giây) thì thử kết nối, đẩy hàng chờ, báo `storage-online` |
+| | `goOffline()` | Chuyển sang Offline, báo `storage-offline` |
+| Kết nối | `createDatabaseClient()` | Tạo kết nối Supabase (chưa điền config / không tải được thư viện → `null`) |
+| | `fetchWithTimeout()` | `fetch` có giới hạn 8 giây |
+| | `isNetworkError(error, status)` | Phân biệt lỗi mạng với lỗi database từ chối |
+| Đổi tên trường | `toRow(ev)` / `fromRow(row)` | `start/end` ↔ `start_time/end_time`, cắt giây `"07:30:00"` → `"07:30"` |
+| Trên máy | `applyToCache` / `readCache` / `writeCache` | Bản sao dữ liệu trong localStorage |
+| | `readPending` / `writePending` / `readJson` | Hàng chờ các thay đổi chưa đẩy lên |
 
 **`script.js` – giao diện**
 
 | Nhóm | Hàm | Làm gì |
 | --- | --- | --- |
 | Lưu trữ | `reloadEvents()` | Nạp lại dữ liệu rồi vẽ lại, lỗi thì báo |
-| | `persist(action)` | Chạy 1 thao tác lưu, lỗi thì báo |
+| | `persist(action)` | Chạy 1 thao tác lưu; database từ chối thì nạp lại dữ liệu thật rồi báo |
 | Dựng khung | `buildGrid()` | Tạo cột giờ + 7 cột ngày |
 | | `buildTypeOptions()` | Tạo các `<option>` loại sự kiện |
 | Vẽ | `render()` | Vẽ lại theo chế độ Week / Month |
@@ -334,8 +367,11 @@ Thứ tự nạp trong `index.html`: `utils.js` → `data.js` → `script.js` �
 | Modal | `openModal(ev, preset)` / `closeModal()` | Mở / đóng form thêm-sửa |
 | | `defaultDateKey()` | Ngày mặc định khi thêm mới |
 | | `updateTagField()` | Chỉ hiện ô Tag khi loại là bài viết |
-| | `handleSubmit(e)` | Bấm Save: đọc form, kiểm tra, lưu |
-| | `validateForm(data)` | Kiểm tra dữ liệu form, trả về câu báo lỗi |
+| | `readForm()` | Đọc dữ liệu đang nhập trong form (chưa kiểm tra) |
+| | `handleFormInput(e)` | Kiểm tra ngay khi người dùng gõ / chọn |
+| | `validateForm(data)` | Kiểm tra từng ô theo đúng luật của bảng `events`, trả về `{ tên ô: "câu báo lỗi" }` |
+| | `showFieldErrors(errors)` | Hiện lỗi đỏ ngay dưới ô sai (chỉ ô người dùng đã đụng tới) |
+| | `handleSubmit(e)` | Bấm Save: còn lỗi thì báo + đưa con trỏ tới ô sai, **không lưu**; hợp lệ mới lưu |
 | | `deleteEvent(id)` | Xoá sự kiện (có Undo) |
 | Khác | `showToast(message, action)` | Thông báo nhỏ ở đáy màn hình |
 | | `autoCollapseSidebar()` | Màn hình nhỏ thì thu gọn sidebar |
@@ -349,8 +385,61 @@ Thứ tự nạp trong `index.html`: `utils.js` → `data.js` → `script.js` �
 | `START_HOUR`, `END_HOUR` | script.js | Lịch từ 07:00 đến 18:00 |
 | `SLOT_MINUTES`, `SLOT_HEIGHT` | script.js | Mỗi ô 30 phút cao 100px |
 | `PX_PER_MINUTE` | script.js | Số px cho 1 phút (để đặt vị trí thẻ) |
-| `STORAGE_KEY` | storage.js | Tên khoá trong localStorage: `"intelly-events"` |
+| `SUPABASE_URL`, `SUPABASE_KEY` | config.js | Thông tin kết nối Supabase |
+| `CACHE_KEY` | storage.js | Khoá bản sao dữ liệu trong localStorage: `"intelly-events"` |
+| `PENDING_KEY` | storage.js | Khoá hàng chờ trong localStorage: `"intelly-pending"` |
+| `REQUEST_TIMEOUT`, `RETRY_INTERVAL` | storage.js | Chờ tối đa 8 giây / Offline thì 30 giây thử lại 1 lần |
+| `db`, `isOffline` | storage.js | Kết nối Supabase / đang Offline hay không |
 | `events` | script.js | Danh sách sự kiện đang hiển thị |
 | `currentDate`, `currentView` | script.js | Đang xem ngày nào, chế độ Week hay Month |
 | `searchQuery`, `activeCategories` | script.js | Chữ đang tìm, các nút lọc đang bật |
 | `editMode`, `editingId` | script.js | Đang bật chế độ xoá nhanh? Đang sửa sự kiện nào? |
+| `touchedFields` | script.js | Các ô trong form người dùng đã đụng tới (để biết hiện lỗi ở đâu) |
+
+---
+
+## Phần 3 – Supabase (lưu dữ liệu online)
+
+### 3.1 Điền thông tin kết nối
+
+Mở `FE_todo_web_app/config.js`, thay 2 dòng:
+
+```js
+const SUPABASE_URL = "PASTE_YOUR_PROJECT_URL_HERE"; // ví dụ: https://abcxyz.supabase.co
+const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE"; // ví dụ: sb_publishable_xxxxxxxx
+```
+
+Lấy ở Supabase: **Project Settings → API Keys** (hoặc nút **Connect** ở đầu dashboard).
+
+- Chỉ dùng **Publishable key** (`sb_publishable_...`) hoặc **anon key**. Key này được thiết kế để nằm trong code web, lên GitHub cũng được; dữ liệu được bảo vệ bằng RLS.
+- **Không bao giờ** dán **secret key** (`sb_secret_...`), **service_role key** hay mật khẩu database.
+- Chưa điền thì web vẫn chạy ở chế độ Offline (chỉ lưu trên máy).
+
+### 3.2 Web lưu dữ liệu thế nào
+
+```
+Online :  script.js ──> storage.js ──> Supabase (bảng events)
+                                   └─> bản sao trên máy (localStorage)
+Offline:  script.js ──> storage.js ──> bản sao trên máy + hàng chờ
+Có mạng lại: hàng chờ ──> Supabase, rồi tải lại dữ liệu mới nhất
+```
+
+- **Kiểm tra trước khi lưu:** form kiểm tra từng ô theo đúng luật của bảng `events` (độ dài, giờ, loại, người tham gia…). Sai thì báo đỏ ngay dưới ô và **không gửi đi**.
+- **Offline:** nhãn hồng "Offline – changes are saved on this device" hiện cạnh nút chọn ngày. Thêm / sửa / xoá vẫn làm được, được xếp vào hàng chờ.
+- **Có mạng lại:** khi trình duyệt báo có mạng, hoặc cứ mỗi 30 giây, web tự đẩy hàng chờ lên Supabase, tải lại dữ liệu và báo "Back online – changes synced".
+- **Bảng trống thì lịch trống** (không tự tạo dữ liệu mẫu).
+
+### 3.3 Kiểm tra sau khi điền config
+
+1. Mở web → không thấy nhãn Offline, lịch trống (bảng còn trống).
+2. Thêm 1 sự kiện → Supabase **Table Editor → events** có thêm 1 dòng.
+3. Mở web bằng trình duyệt khác / tab ẩn danh → thấy đúng sự kiện đó.
+4. Xoá 1 dòng trực tiếp trên Supabase → bấm nút Refresh trên web → sự kiện biến mất.
+5. Tắt mạng (DevTools F12 → Network → Offline) → thêm sự kiện → nhãn Offline hiện.
+   Bật mạng lại → vài giây sau báo "Back online", Supabase có dòng mới.
+
+### 3.4 Giới hạn (bản tạm)
+
+- Chưa có đăng nhập: **ai có link web đều xem / sửa / xoá được**.
+- 2 người sửa cùng 1 sự kiện: người lưu sau thắng.
+- Sửa khi Offline một sự kiện mà người khác đã xoá → khi có mạng, sự kiện đó được tạo lại.
