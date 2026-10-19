@@ -44,6 +44,7 @@ const formError = document.getElementById("form-error");
 const deleteBtn = document.getElementById("delete-btn");
 
 const toast = document.getElementById("toast");
+const syncStatus = document.getElementById("sync-status");
 
 let dayColumns = [];
 
@@ -55,6 +56,7 @@ let searchQuery = "";
 const activeCategories = new Set();
 let editMode = false;
 let editingId = null;
+let touchedFields = new Set(); // Các ô trong form người dùng đã đụng tới
 
 document.addEventListener("DOMContentLoaded", async () => {
   document.documentElement.style.setProperty("--slot-height", `${SLOT_HEIGHT}px`);
@@ -88,12 +90,14 @@ async function reloadEvents() {
   }
 }
 
-// Chạy 1 thao tác lưu (add/update/remove), lỗi thì báo cho người dùng
+// Chạy 1 thao tác lưu (add/update/remove). Nếu database từ chối thì nạp lại
+// dữ liệu thật để màn hình khớp với database, rồi báo cho người dùng.
 async function persist(action) {
   try {
     await action();
   } catch (error) {
     console.error("Không lưu được thay đổi:", error);
+    await reloadEvents();
     showToast("Couldn't save your change");
   }
 }
@@ -348,6 +352,8 @@ function openModal(ev, preset = {}) {
   modalTitle.textContent = ev ? "Edit event" : "Add event";
   deleteBtn.hidden = !ev;
   formError.hidden = true;
+  touchedFields = new Set();
+  showFieldErrors({}); // xoá lỗi còn sót từ lần mở trước
 
   const data = ev || {
     title: "",
@@ -396,28 +402,72 @@ function updateTagField() {
   tagField.hidden = typeSelect.value !== "article";
 }
 
-function handleSubmit(e) {
-  e.preventDefault();
+// Đọc dữ liệu đang nhập trong form (chưa kiểm tra)
+function readForm() {
   const fd = new FormData(form);
-  const data = {
+  const type = fd.get("type");
+  return {
     title: fd.get("title").trim(),
-    type: fd.get("type"),
+    type,
     date: fd.get("date"),
     start: fd.get("start"),
     end: fd.get("end"),
     location: fd.get("location").trim(),
     attachment: fd.get("attachment").trim(),
-    tag: fd.get("type") === "article" ? fd.get("tag").trim() : "",
+    tag: type === "article" ? fd.get("tag").trim() : "",
     description: fd.get("description").trim(),
-    ...parseParticipants(fd.get("participants")),
+    participantsText: fd.get("participants"),
   };
+}
 
-  const error = validateForm(data);
-  if (error) {
-    formError.textContent = error;
+// Kiểm tra ngay khi người dùng gõ / chọn trong form
+function handleFormInput(e) {
+  const name = e.target.name;
+  if (!name) return;
+
+  touchedFields.add(name);
+  // Giờ bắt đầu và kết thúc phụ thuộc nhau nên đổi 1 ô là kiểm tra cả 2
+  if (name === "start" || name === "end") {
+    touchedFields.add("start");
+    touchedFields.add("end");
+  }
+  if (name === "type") updateTagField();
+
+  formError.hidden = true;
+  showFieldErrors(validateForm(readForm()));
+}
+
+// Hiện lỗi ngay dưới từng ô. Chỉ hiện ở ô người dùng đã đụng tới,
+// để form vừa mở không bị đỏ hết lên.
+function showFieldErrors(errors) {
+  form.querySelectorAll(".field-error").forEach((el) => {
+    const name = el.dataset.errorFor;
+    const message = touchedFields.has(name) ? errors[name] || "" : "";
+    el.textContent = message;
+    el.hidden = !message;
+    el.closest(".field").classList.toggle("invalid", Boolean(message));
+    form.elements[name].setAttribute("aria-invalid", String(Boolean(message)));
+  });
+}
+
+function handleSubmit(e) {
+  e.preventDefault();
+  const formData = readForm();
+  const errors = validateForm(formData);
+  const invalidFields = Object.keys(errors);
+
+  // Có lỗi: hiện hết lỗi, đưa con trỏ tới ô sai đầu tiên và KHÔNG lưu
+  if (invalidFields.length) {
+    invalidFields.forEach((name) => touchedFields.add(name));
+    showFieldErrors(errors);
+    formError.textContent = "Please fix the highlighted fields.";
     formError.hidden = false;
+    form.elements[invalidFields[0]].focus();
     return;
   }
+
+  const { participantsText, ...fields } = formData;
+  const data = { ...fields, ...parseParticipants(participantsText) };
 
   if (editingId) {
     const index = events.findIndex((ev) => ev.id === editingId);
@@ -438,17 +488,40 @@ function handleSubmit(e) {
   render();
 }
 
+// Kiểm tra từng ô theo đúng luật của bảng "events" trên Supabase,
+// để dữ liệu sai không bao giờ được gửi đi.
+// Trả về { tên ô: "câu báo lỗi" }; object rỗng nghĩa là hợp lệ.
 function validateForm(data) {
-  if (!data.title) return "Please enter a title.";
-  if (!data.date) return "Please choose a date.";
-  if (!data.start || !data.end) return "Please choose start and end time.";
-  const start = toMinutes(data.start);
-  const end = toMinutes(data.end);
-  if (end <= start) return "End time must be after start time.";
-  if (start < START_HOUR * 60 || end > END_HOUR * 60) {
-    return `Time must be between ${toTime(START_HOUR * 60)} and ${toTime(END_HOUR * 60)}.`;
+  const errors = {};
+  const dayStart = START_HOUR * 60;
+  const dayEnd = END_HOUR * 60;
+  const range = `between ${toTime(dayStart)} and ${toTime(dayEnd)}`;
+
+  if (!data.title) errors.title = "Please enter a title.";
+  else if (data.title.length > 60) errors.title = "Title must be 60 characters or less.";
+
+  if (!EVENT_TYPES[data.type]) errors.type = "Please choose a type.";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) errors.date = "Please choose a date.";
+
+  if (!data.start) errors.start = "Please choose a start time.";
+  if (!data.end) errors.end = "Please choose an end time.";
+  if (data.start && data.end) {
+    const start = toMinutes(data.start);
+    const end = toMinutes(data.end);
+    if (start < dayStart || start >= dayEnd) errors.start = `Start time must be ${range}.`;
+    if (end > dayEnd) errors.end = `End time must be ${range}.`;
+    else if (end <= start) errors.end = "End time must be after start time.";
   }
-  return "";
+
+  const maxLengths = { location: 60, attachment: 40, tag: 30, description: 200 };
+  for (const [name, max] of Object.entries(maxLengths)) {
+    if (data[name].length > max) errors[name] = `Must be ${max} characters or less.`;
+  }
+
+  const participantsError = checkParticipants(data.participantsText);
+  if (participantsError) errors.participants = participantsError;
+
+  return errors;
 }
 
 function deleteEvent(id) {
@@ -618,6 +691,17 @@ function bindEvents() {
     if (ev) openModal(ev);
   });
 
+  // Trạng thái kết nối (tín hiệu do storage.js phát ra)
+  window.addEventListener("storage-offline", () => {
+    syncStatus.hidden = false;
+    showToast("Offline mode – changes are saved on this device");
+  });
+  window.addEventListener("storage-online", async () => {
+    syncStatus.hidden = true;
+    await reloadEvents();
+    showToast("Back online – changes synced");
+  });
+
   // Click 1 ngày trong tháng => chuyển về tuần đó
   monthView.addEventListener("click", (e) => {
     const cell = e.target.closest(".month-cell");
@@ -630,7 +714,8 @@ function bindEvents() {
 
   // Modal
   form.addEventListener("submit", handleSubmit);
-  typeSelect.addEventListener("change", updateTagField);
+  form.addEventListener("input", handleFormInput); // gõ chữ
+  form.addEventListener("change", handleFormInput); // chọn ngày / giờ / loại
   modal.querySelectorAll("[data-close]").forEach((btn) => btn.addEventListener("click", closeModal));
   modal.addEventListener("click", (e) => {
     if (e.target === modal) closeModal();
