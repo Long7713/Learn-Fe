@@ -402,7 +402,7 @@ Thứ tự nạp trong `index.html`: supabase-js (CDN) → `config.js` → `util
 
 ### 3.1 Điền thông tin kết nối
 
-Mở `FE_todo_web_app/config.js`, thay 2 dòng:
+Mở `FE_todo_web_app/config.js`, thêm 2 dòng:
 
 ```js
 const SUPABASE_URL = "PASTE_YOUR_PROJECT_URL_HERE"; // ví dụ: https://abcxyz.supabase.co
