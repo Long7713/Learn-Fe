@@ -6,5 +6,5 @@
 //
 // Chưa điền thì web vẫn chạy ở chế độ Offline (chỉ lưu trên máy này).
 
-const SUPABASE_URL = "PASTE_YOUR_PROJECT_URL_HERE"; // ví dụ: https://abcxyz.supabase.co
-const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE"; // ví dụ: sb_publishable_xxxxxxxx
+const SUPABASE_URL = "https://gvvcmnhyvsvbmsqsjvnb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_B4Z0801XMJyMipRVc8CuIQ_45a8-uCG"; 
